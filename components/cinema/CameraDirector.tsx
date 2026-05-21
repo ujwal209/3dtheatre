@@ -24,36 +24,7 @@ export default function CameraDirector({ targetPos, controlsRef, animating, setA
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // 🛑 STRICT CAMERA CONSTRAINTS
-  useEffect(() => {
-    if (!controlsRef.current) return;
-    const controls = controlsRef.current;
-
-    if (targetPos) {
-      // 💺 SEATED VIEW LIMITS (Locked in the chair)
-      controls.minDistance = 0.1;
-      controls.maxDistance = 0.1; 
-      
-      controls.minAzimuthAngle = -Math.PI / 2.5; 
-      controls.maxAzimuthAngle = Math.PI / 2.5;  
-      
-      controls.minPolarAngle = Math.PI / 2.5; 
-      controls.maxPolarAngle = Math.PI / 1.8; 
-      controls.enablePan = false; 
-    } else {
-      // 🚁 DEFAULT OVERVIEW LIMITS (Floating in the back)
-      controls.minDistance = 5;
-      controls.maxDistance = 60; 
-      
-      // 360-degree unrestricted circular turn!
-      controls.minAzimuthAngle = -Infinity; 
-      controls.maxAzimuthAngle = Infinity;  
-      
-      controls.minPolarAngle = Math.PI / 6; 
-      controls.maxPolarAngle = Math.PI / 2 - 0.05;
-      controls.enablePan = false; 
-    }
-  }, [targetPos, controlsRef]);
+  // Constraints are now enforced frame-by-frame below to guarantee sync.
 
   // Trigger the glide animation only when targetPos changes
   useEffect(() => {
@@ -71,21 +42,24 @@ export default function CameraDirector({ targetPos, controlsRef, animating, setA
   }, [targetPos, setAnimating]);
 
   useFrame((state) => {
-    if (controlsRef.current && !targetPos && !animating) {
+    // 🛡️ CONTINUOUS SYNCHRONIZATION 🛡️
+    // Apply constraints in useFrame to guarantee they NEVER fall out of sync with OrbitControls
+    if (controlsRef.current && !animating) {
       const controls = controlsRef.current;
-      const distance = controls.getDistance();
-      
-      // 🛡️ DYNAMIC MATHEMATICAL GUARDRAIL
-      // If we are zoomed out (distance > 9.5), we dynamically clamp the rotation angle 
-      // so the camera physically cannot cross Z = -9.5 (right in front of the screen).
-      // If zoomed in close (distance <= 9.5), the angle opens to Infinity for full 360 spin!
-      if (distance > 9.5) {
-        const maxAzimuth = Math.acos(-9.5 / distance);
-        controls.minAzimuthAngle = -maxAzimuth;
-        controls.maxAzimuthAngle = maxAzimuth;
+      if (targetPos) {
+        controls.minDistance = 0.1;
+        controls.maxDistance = 0.1; 
+        controls.minAzimuthAngle = -Math.PI / 2.5; 
+        controls.maxAzimuthAngle = Math.PI / 2.5;  
+        controls.minPolarAngle = Math.PI / 2.5; 
+        controls.maxPolarAngle = Math.PI / 1.8; 
       } else {
-        controls.minAzimuthAngle = -Infinity;
-        controls.maxAzimuthAngle = Infinity;
+        controls.minDistance = 5;
+        controls.maxDistance = 24.5; 
+        controls.minAzimuthAngle = -Infinity; 
+        controls.maxAzimuthAngle = Infinity;  
+        controls.minPolarAngle = Math.PI / 6; 
+        controls.maxPolarAngle = Math.PI / 2 - 0.05;
       }
     }
 
@@ -106,8 +80,8 @@ export default function CameraDirector({ targetPos, controlsRef, animating, setA
       } else {
         // 2. WE ARE STANDING BACK UP
         const defaultPos = isMobile 
-          ? new THREE.Vector3(0, 7, 24)
-          : new THREE.Vector3(0, 6, 20);
+          ? new THREE.Vector3(0, 6, 14)
+          : new THREE.Vector3(0, 5, 12);
         const defaultTarget = new THREE.Vector3(0, 8, 0);
 
         state.camera.position.lerp(defaultPos, 0.06);

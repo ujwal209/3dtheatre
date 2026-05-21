@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Html } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 
 interface ScreenProps {
   videoUrl: string;
@@ -14,6 +15,18 @@ export default function CinemaScreen({ videoUrl, isMuted, activeColorHex }: Scre
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isYoutube, setIsYoutube] = useState(false);
   const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState('');
+  const [isBehind, setIsBehind] = useState(false);
+
+  // 🌟 DYNAMIC IFRAME CULLING 🌟
+  // Completely removes the YouTube iframe from the DOM when the camera orbits behind the screen
+  // to prevent CSS3D rendering glitches (the massive black box) when viewed from behind!
+  useFrame((state) => {
+    if (state.camera.position.z < -10.0) {
+      if (!isBehind) setIsBehind(true);
+    } else {
+      if (isBehind) setIsBehind(false);
+    }
+  });
 
   // Fallback to demo.mp4 if no video is selected or path is blank
   const activeUrl = videoUrl && videoUrl.trim() !== '' ? videoUrl.trim() : '/demo.mp4';
@@ -121,7 +134,8 @@ export default function CinemaScreen({ videoUrl, isMuted, activeColorHex }: Scre
           boxShadow: '0 0 50px rgba(0,0,0,0.92)',
           pointerEvents: 'none', // 🌟 PREVENT CLICKING TO PAUSE!
           userSelect: 'none',
-          backfaceVisibility: 'hidden', // 🌟 INVISIBLE FROM BEHIND!
+          backfaceVisibility: 'hidden', 
+          display: isBehind ? 'none' : 'block', // 🌟 COMPLETELY UNMOUNTS WHEN VIEWED FROM BEHIND!
         }}
       >
         {isYoutube ? (

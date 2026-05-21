@@ -17,7 +17,7 @@ export default function CinemaPage() {
   
   // Settings State
   const [ambientColor, setAmbientColor] = useState('#00ffff');
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=crUpS21VCyo');
   const [inputUrl, setInputUrl] = useState('');
   
@@ -205,7 +205,7 @@ export default function CinemaPage() {
           }}
           shadows={{ type: THREE.PCFShadowMap }} 
           camera={{ 
-            position: isMobile ? [0, 7, 24] : [0, 6, 20], 
+            position: isMobile ? [0, 6, 14] : [0, 5, 12], 
             fov: isMobile ? 65 : 55 
           }} 
           className="pointer-events-auto"
@@ -240,9 +240,9 @@ export default function CinemaPage() {
             enableDamping={true} 
             dampingFactor={0.05}
             enablePan={false}
-            enabled={!targetCameraPos && !isAnimating} // 🌟 FULLY CONTROLLED BY REACT STATE!
+            enabled={!isAnimating} // 🌟 ONLY disabled while gliding! Allows looking around when seated!
             enableZoom={!targetCameraPos && !isAnimating} 
-            enableRotate={!targetCameraPos && !isAnimating} 
+            enableRotate={!isAnimating} 
           />
         </Canvas>
       </div>

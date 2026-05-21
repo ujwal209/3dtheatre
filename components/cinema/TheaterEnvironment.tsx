@@ -70,13 +70,19 @@ export default function TheaterEnvironment({ onSeatSelect, selectedSeatPos, acti
   return (
     <group>
       {/* Wall coordinates pushed wide and deep to seal the massive 360 room! */}
-      <mesh position={[-25, 6, 0]}><boxGeometry args={[0.4, 20, 60]} /><meshStandardMaterial color="#020204" roughness={1} /></mesh>
-      <mesh position={[25, 6, 0]}><boxGeometry args={[0.4, 20, 60]} /><meshStandardMaterial color="#020204" roughness={1} /></mesh>
+      <mesh position={[-25, 16, 0]}><boxGeometry args={[0.4, 40, 60]} /><meshStandardMaterial color="#020204" roughness={1} /></mesh>
+      <mesh position={[25, 16, 0]}><boxGeometry args={[0.4, 40, 60]} /><meshStandardMaterial color="#020204" roughness={1} /></mesh>
       
       {/* Front and Back Walls to completely enclose the camera during 360 orbit */}
-      <mesh position={[0, 6, -28]}><boxGeometry args={[50, 20, 0.4]} /><meshStandardMaterial color="#020204" roughness={1} /></mesh>
-      <mesh position={[0, 6, 28]}><boxGeometry args={[50, 20, 0.4]} /><meshStandardMaterial color="#020204" roughness={1} /></mesh>
+      <mesh position={[0, 16, -28]}><boxGeometry args={[50, 40, 0.4]} /><meshStandardMaterial color="#020204" roughness={1} /></mesh>
+      <mesh position={[0, 16, 28]}><boxGeometry args={[50, 40, 0.4]} /><meshStandardMaterial color="#020204" roughness={1} /></mesh>
       
+      {/* Solid Ceiling so the camera cannot look over the walls when panning up */}
+      <mesh position={[0, 36, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[50, 60]} />
+        <meshStandardMaterial color="#010102" roughness={1} />
+      </mesh>
+
       {stairSteps}
       {seats}
       
